@@ -5,7 +5,7 @@ from azure.ai.textanalytics import (
     ExtractSummaryAction
 )
 
-def sample_extractive_summarization():
+def sample_extractive_summarization(document):
     endpoint = "https://hack121022.cognitiveservices.azure.com/"
     key = os.getenv("AZURE_API_KEY")
 
@@ -13,8 +13,6 @@ def sample_extractive_summarization():
         endpoint=endpoint,
         credential=AzureKeyCredential(key),
     )
-
-    document = [""]
 
     poller = text_analytics_client.begin_analyze_actions(
         document,
