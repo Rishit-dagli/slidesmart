@@ -12,22 +12,25 @@
 <body>
     <div class="main">
         <div class="container a-container" id="a-container">
-            <form class="form" id="a-form" method="post" enctype="multipart/form-data">
+            <form class="form" id="a-form" method="post" enctype="multipart/form-data"
+                action="{% url 'text_receiver' %}">
                 {% csrf_token %}
                 <h2 class="form_title title">Text Submission</h2><span class="form__span">generate slides in a matter of
-                    seconds</span><input class="form__input" type="text" placeholder="Slideshow Title"><input
-                    class="form__input" type="text" placeholder="Author"><input class="form__icon" type="file"
-                    name="myfile"><button class="form__button button submit">Generate</button>
+                    seconds</span><input class="form__input" type="text" name="title" placeholder="Slideshow Title"
+                    required><input class="form__input" type="text" name="author" placeholder="Author" required><input
+                    class="form__icon" type="file" name="myfile" required><button class="form__button button submit"
+                    type="submit">Generate</button><input class="" type="submit" value="Generate">
             </form>
         </div>
         <div class="container b-container" id="b-container">
-            <form class="form" id="b-form" method="" action="">
+            <form class="form" id="b-form" method="post" action="{% url 'audio_receiver' %}">
                 {% csrf_token %}
                 <h2 class="form_title title">Audio Submission</h2><span class="form__span">generate slides in ~30% of
-                    audio file playtime</span><input class="form__input" type="text"
-                    placeholder="Slideshow Title"><input class="form__input" type="password" placeholder="Author"><input
-                    class="form__input" type="password" placeholder="YouTube link to audio"><button
-                    class="form__button button submit">Generate</button>
+                    audio file playtime</span><input class="form__input" type="text" placeholder="Slideshow Title"
+                    name="title" required><input class="form__input" type="text" placeholder="Author" name="author"
+                    required><input class="form__input" type="text" placeholder="YouTube link to audio"
+                    name="audio_link" required><input class="form__button button submit" type="submit"
+                    value="Generate"><input class="" type="submit" value="Generate">
             </form>
         </div>
         <div class="switch" id="switch-cnt">
