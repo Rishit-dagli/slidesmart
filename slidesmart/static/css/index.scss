@@ -93,14 +93,14 @@ body {
 
     &__icon {
         object-fit: contain;
-        width: 30px;
-        margin: 0 5px;
+        width: 200px;
+        margin: 10px 5px;
         opacity: .5;
         transition: .15s;
 
         &:hover {
-            opacity: 1;
-            transition: .15s;
+            opacity: 0.6;
+            transition: .25s;
             cursor: pointer;
 
         }
