@@ -23,6 +23,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-cz=o$60egx5ft+ckzhhv8-r9mzqv2nlt1=$c6o26hikm%=lqu6'
 
+# initiate .env file
+import environ
+env = environ.Env(
+    DEBUG=(bool, False)
+)
+# read .env file
+environ.Env.read_env()
+
+AZURE_API_KEY = env('AZURE_API_KEY')
+ASSEMBLYAI_API_KEY = env('ASSEMBLYAI_API_KEY')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
