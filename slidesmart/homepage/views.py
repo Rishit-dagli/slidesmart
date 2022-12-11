@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.http import require_POST
+import requests
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.textanalytics import (
     TextAnalyticsClient,
@@ -26,7 +27,7 @@ def index(request):
 @require_POST
 def receive_audio(request):
     try:
-        print(request.POST)
+        audio_summarization(request.POST.get("audio_link"))
     except:
         pass
 
@@ -36,23 +37,13 @@ def receive_audio(request):
 @require_POST
 def receive_text(request):
     try:
-        print(request.POST)
         myfile = request.FILES['myfile']
-        with open(myfile.name) as f:
-            lines = f.readlines()
-            print(lines)
-            summary, keywords = sample_extractive_summarization(lines)
+        with open(myfile.name, 'r') as f:
+            summary, keywords = sample_extractive_summarization([f.read().rstrip()])
             print(summary)
             print(keywords)
     except:
         pass
-
-    print(request.POST)
-    myfile = request.FILES['myfile']
-    with open(myfile.name, 'r') as f:
-        summary, keywords = sample_extractive_summarization([f.read().rstrip()])
-        print(summary)
-        print(keywords)
 
     return redirect('index')
 
@@ -99,3 +90,19 @@ def sample_extractive_summarization(document):
             keywords = ", ".join(doc.key_phrases)
     
     return summary, keywords
+
+
+def audio_summarization(audio_link):
+    """Get summarization of audio using AssemblyAI API"""
+    endpoint = "https://api.assemblyai.com/v2/transcript"
+    json = {
+        "audio_url": audio_link,
+        "auto_chapters": True,
+        "auto_highlights": True
+    }
+    headers = {
+        "authorization": settings.ASSEMBLYAI_API_KEY,
+        "content-type": "application/json"
+    }
+    response = requests.post(endpoint, json=json, headers=headers)
+    print(response.json())
