@@ -1,4 +1,5 @@
-![image](https://user-images.githubusercontent.com/84627365/206897738-e9aa7546-b48c-417c-82ad-b910199c67eb.png)
+![image](https://user-images.githubusercontent.com/64745558/206898038-802fc8b5-18de-44d3-a8c7-334fabc9ad43.png)
+
 
 # Slidesmart
 
