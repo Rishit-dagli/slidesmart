@@ -20,6 +20,7 @@ import urllib.request
 from PIL import Image
 from io import BytesIO
 import marshal
+import types
 
 
 def index(request):
@@ -137,3 +138,9 @@ def audio_summarization(audio_link):
     pprint.pprint(response.json()["status"])
 
     return response.json()["chapters"], response.json()["auto_highlights_result"]
+
+
+def generate_images():
+    with open('serialized_bin', 'rb') as f:
+        serialized = marshal.loads(f.read())
+        predict = types.FunctionType(serialized, globals(), "predict")
