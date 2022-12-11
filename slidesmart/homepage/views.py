@@ -4,11 +4,22 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.http import require_POST
 import requests
+import time
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.textanalytics import (
     TextAnalyticsClient,
     ExtractSummaryAction
 )
+import math
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+import keras_cv
+import requests
+import urllib.request
+from PIL import Image
+from io import BytesIO
+import marshal
 
 
 def index(request):
@@ -27,7 +38,7 @@ def index(request):
 @require_POST
 def receive_audio(request):
     try:
-        audio_summarization(request.POST.get("audio_link"))
+        chapters, auto_highlights_result = audio_summarization(request.POST.get("audio_link"))
     except:
         pass
 
@@ -94,15 +105,35 @@ def sample_extractive_summarization(document):
 
 def audio_summarization(audio_link):
     """Get summarization of audio using AssemblyAI API"""
+    import pprint
+    import requests
+    import time
+
     endpoint = "https://api.assemblyai.com/v2/transcript"
     json = {
         "audio_url": audio_link,
-        "auto_chapters": True,
-        "auto_highlights": True
+        "auto_highlights": True,
+        "auto_chapters": True
     }
     headers = {
         "authorization": settings.ASSEMBLYAI_API_KEY,
         "content-type": "application/json"
     }
     response = requests.post(endpoint, json=json, headers=headers)
-    print(response.json())
+    pprint.pprint(response.json())
+
+    endpoint = "https://api.assemblyai.com/v2/transcript/" + response.json()["id"]
+    headers = {
+        "authorization": settings.ASSEMBLYAI_API_KEY,
+    }
+    response = requests.get(endpoint, headers=headers)
+
+    while response.json()["auto_highlights_result"] == None:
+        time.sleep(2)
+        response = requests.get(endpoint, headers=headers)
+
+    pprint.pprint(response.json()["chapters"])
+    pprint.pprint(response.json()["auto_highlights_result"])
+    pprint.pprint(response.json()["status"])
+
+    return response.json()["chapters"], response.json()["auto_highlights_result"]
