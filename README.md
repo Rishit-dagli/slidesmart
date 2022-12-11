@@ -1,3 +1,6 @@
+![image](https://user-images.githubusercontent.com/84627365/206897658-e885235c-13fd-40ea-894a-f358164ce714.png)
+
+
 # Slidesmart
 
 The fast-paced education system today burdens educators with hours of work. Researching, teaching, designing courses, marking papers takes up most of their time. Providing them with a useful tool to assist their presentations is crucial.
