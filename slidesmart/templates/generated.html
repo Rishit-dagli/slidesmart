@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="main">
+        <div class="container a-container" id="a-container">
+            <form class="form" id="a-form" method="post" enctype="multipart/form-data"
+                action="{% url 'text_receiver' %}">
+                {% csrf_token %}
+                <h2 class="form_title title">Slide Generation Complete</h2><span class="form__span">download your
+                    cutomized presentation below</span><input class="switch__button button switch-btn" type="submit"
+                    value="Download">
+            </form>
+        </div>
+        <div class="switch" id="switch-cnt">
+            <div class="switch__circle"></div>
+            <div class="switch__circle switch__circle--t"></div>
+            <div class="switch__container" id="switch-c1">
+                <h2 class="switch__title title">Slidesmart</h2>
+                <p class="switch__description description">Slidesmart uses state-of-the-art machine
+                    learning algorithms and APIs to curate customized slides using your presentation's audio or script.
+                </p>
+                <form action="{% url 'index' %}">
+                    <button class="switch__button button switch-btn" type="submit">Back</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

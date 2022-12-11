@@ -52,6 +52,7 @@ INSTALLED_APPS = [
 
     # django apps
     'homepage',
+    'generated',
 ]
 
 MIDDLEWARE = [
