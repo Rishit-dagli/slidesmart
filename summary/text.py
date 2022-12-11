@@ -1,9 +1,7 @@
 import os
 from azure.core.credentials import AzureKeyCredential
-from azure.ai.textanalytics import (
-    TextAnalyticsClient,
-    ExtractSummaryAction
-)
+from azure.ai.textanalytics import TextAnalyticsClient, ExtractSummaryAction
+
 
 def sample_extractive_summarization(document):
     endpoint = "https://hack121022.cognitiveservices.azure.com/"
@@ -17,7 +15,7 @@ def sample_extractive_summarization(document):
     poller = text_analytics_client.begin_analyze_actions(
         document,
         actions=[
-            ExtractSummaryAction(max_sentence_count = 20),
+            ExtractSummaryAction(max_sentence_count=20),
         ],
     )
 
@@ -25,18 +23,23 @@ def sample_extractive_summarization(document):
     for extract_summary_results in document_results:
         for result in extract_summary_results:
             if result.kind == "ExtractiveSummarization":
-                print("Summary extracted: \n{}".format(
-                    " ".join([sentence.text for sentence in result.sentences]))
+                print(
+                    "Summary extracted: \n{}".format(
+                        " ".join([sentence.text for sentence in result.sentences])
+                    )
                 )
             elif result.is_error is True:
-                print("...Is an error with code '{}' and message '{}'".format(
-                    result.code, result.message
-                ))
-    
+                print(
+                    "...Is an error with code '{}' and message '{}'".format(
+                        result.code, result.message
+                    )
+                )
+
     result = text_analytics_client.extract_key_phrases(document)
     for idx, doc in enumerate(result):
         if not doc.is_error:
-            print("Key phrases in article #{}: {}".format(
-                idx + 1,
-                ", ".join(doc.key_phrases)
-            ))
+            print(
+                "Key phrases in article #{}: {}".format(
+                    idx + 1, ", ".join(doc.key_phrases)
+                )
+            )

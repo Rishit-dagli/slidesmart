@@ -6,4 +6,4 @@ from django.core.files.storage import FileSystemStorage
 
 def generated(request):
 
-    return render(request, 'generated.html')
+    return render(request, "generated.html")
