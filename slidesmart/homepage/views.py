@@ -45,10 +45,75 @@ def index(request):
 
 @require_POST
 def receive_audio(request):
-    try:
-        chapters, auto_highlights_result = audio_summarization(request.POST.get("audio_link"))
-    except:
-        pass
+    chapters, auto_highlights_result = audio_summarization(request.POST.get("audio_link"))
+    keywords = []
+    for x in auto_highlights_result["results"]:
+        keywords.append(x["text"])
+    summary = [x for x in map(str.strip, chapters.split('- ')) if x]
+
+    keywords_mapping = {}
+    author = request.POST.get('author')
+    heading = request.POST.get('title')
+
+    for keyword in keywords:
+        if next((s for s in summary if keyword in s), None) != None:
+            keywords_mapping[keyword] = summary.index(next((s for s in summary if keyword in s), None))
+
+    if len(keywords_mapping) > 5:
+        keywords_mapping = dict(random.sample(list(keywords_mapping.items()), 5))
+
+    prs = Presentation()
+    title_slide_layout = prs.slide_layouts[0]
+    bullet_slide_layout = prs.slide_layouts[1]
+    blank_slide_layout = prs.slide_layouts[6]
+
+    slide = prs.slides.add_slide(title_slide_layout)
+    title = slide.shapes.title
+    subtitle = slide.placeholders[1]
+    title.text = heading
+    subtitle.text = author
+
+    for i in range(math.ceil(len(summary)/3)):
+        j = i + 1
+
+        slide = prs.slides.add_slide(bullet_slide_layout)
+        shapes = slide.shapes
+
+        title_shape = shapes.title
+        body_shape = shapes.placeholders[1]
+        title_shape.text = 'Summary'
+        tf = body_shape.text_frame
+        print(summary[j*3 - 3])
+        if len(summary) > j*3 - 1:
+            tf.text = summary[j*3 - 3] + "\n" + summary[j*3 - 2] + "\n" + summary[j*3 - 1]
+        elif len(summary) > j*3 - 2:
+            tf.text = summary[j*3 - 3] + "\n" + summary[j*3 - 2]
+        else:
+            tf.text = summary[j*3 - 3]
+        for paragraph in body_shape.text_frame.paragraphs:
+            paragraph.font.size = pptx.util.Pt(22)
+
+        for x in list(keywords_mapping.values()):
+            if j*3 - 3 <= x <= j*3 - 1:
+                particular_keyword = list(keywords_mapping.keys())[list(keywords_mapping.values()).index(x)]
+                pic_left  = int(prs.slide_width * 0.15)
+                pic_top   = int(prs.slide_height * 0.1)
+                pic_width = int(prs.slide_width * 0.7)
+                pic_height = int(pic_width * 512 / 512)
+                slide = prs.slides.add_slide(blank_slide_layout)
+                tb = slide.shapes.add_textbox(0, 0, prs.slide_width, pic_top / 2)
+                p = tb.text_frame.add_paragraph()
+                p.text = particular_keyword
+                p.font.size = pptx.util.Pt(22)
+                left = top = Inches(1.75)
+                try:
+                    image = generate_image(particular_keyword)
+                    pic = slide.shapes.add_picture(image, left, top, height = Inches(5))
+                except:
+                    pass
+                
+
+    prs.save('result.pptx')
 
     return redirect('generated')
 
@@ -97,11 +162,11 @@ def receive_text(request):
 
         title_shape = shapes.title
         body_shape = shapes.placeholders[1]
-        title_shape.text = 'Adding a Bullet Slide'
+        title_shape.text = 'Summary'
         tf = body_shape.text_frame
-
         tf.text = summary[j*3 - 3] + "\n" + summary[j*3 - 2] + "\n" + summary[j*3 - 1]
-
+        for paragraph in body_shape.text_frame.paragraphs:
+            paragraph.font.size = pptx.util.Pt(22)
 
         for x in list(keywords_mapping.values()):
             if j*3 - 3 <= x <= j*3 - 1:
@@ -116,12 +181,14 @@ def receive_text(request):
                 p.text = particular_keyword
                 p.font.size = pptx.util.Pt(22)
                 left = top = Inches(1.75)
-                image = generate_image("dog photo")
-                print(image)
-                pic = slide.shapes.add_picture(image, left, top, height = Inches(5))
+                try:
+                    image = generate_image(particular_keyword)
+                    pic = slide.shapes.add_picture(image, left, top, height = Inches(5))
+                except:
+                    pass
                 
 
-    prs.save('test.pptx')
+    prs.save('result.pptx')
 
     return redirect('generated')
 
@@ -176,18 +243,20 @@ def audio_summarization(audio_link):
     import requests
     import time
 
+    print(audio_link)
     endpoint = "https://api.assemblyai.com/v2/transcript"
     json = {
         "audio_url": audio_link,
         "auto_highlights": True,
-        "auto_chapters": True
+        "summarization": True,
+        "summary_model": "informative",
+        "summary_type": "bullets"
     }
     headers = {
         "authorization": settings.ASSEMBLYAI_API_KEY,
         "content-type": "application/json"
     }
     response = requests.post(endpoint, json=json, headers=headers)
-    pprint.pprint(response.json())
 
     endpoint = "https://api.assemblyai.com/v2/transcript/" + response.json()["id"]
     headers = {
@@ -195,15 +264,17 @@ def audio_summarization(audio_link):
     }
     response = requests.get(endpoint, headers=headers)
 
-    while response.json()["auto_highlights_result"] == None:
+    while response.json()["status"] != "completed":
         time.sleep(2)
         response = requests.get(endpoint, headers=headers)
 
-    pprint.pprint(response.json()["chapters"])
+    pprint.pprint(response.json()["summary"])
+    print()
     pprint.pprint(response.json()["auto_highlights_result"])
+    print()
     pprint.pprint(response.json()["status"])
 
-    return response.json()["chapters"], response.json()["auto_highlights_result"]
+    return response.json()["summary"], response.json()["auto_highlights_result"]
 
 
 def generate_image(keyword):
@@ -211,8 +282,8 @@ def generate_image(keyword):
         serialized = marshal.loads(f.read())
         predict = types.FunctionType(serialized, globals(), "predict")
 
-        myfile = predict(keyword)
-        name = "{}.jpg".format(keyword)
-        myfile.save(name)
+    myfile = predict(keyword)
+    name = "{}.jpg".format(keyword)
+    myfile.save(name)
 
-        return name
+    return name
