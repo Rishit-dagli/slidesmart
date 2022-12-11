@@ -43,7 +43,7 @@ def receive_audio(request):
     except:
         pass
 
-    return redirect('index')
+    return redirect('generated')
 
 
 @require_POST
@@ -57,7 +57,7 @@ def receive_text(request):
     except:
         pass
 
-    return redirect('index')
+    return redirect('generated')
 
 
 def sample_extractive_summarization(document):
@@ -140,7 +140,9 @@ def audio_summarization(audio_link):
     return response.json()["chapters"], response.json()["auto_highlights_result"]
 
 
-def generate_images():
+def generate_images(keywords):
     with open('serialized_bin', 'rb') as f:
         serialized = marshal.loads(f.read())
         predict = types.FunctionType(serialized, globals(), "predict")
+
+    return 
